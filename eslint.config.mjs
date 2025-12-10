@@ -1,26 +1,38 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import importPlugin from 'eslint-plugin-import';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
-import { FlatCompat } from '@eslint/eslintrc';
-import eslintPluginImport from 'eslint-plugin-import';
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
-    files: ['**/*.{js,cjs,mjs,ts,tsx}'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
+
     ignores: ['components/ui/'],
+
     plugins: {
-      import: eslintPluginImport,
+      import: importPlugin,
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
+      '@typescript-eslint': tsPlugin,
     },
+
     rules: {
-      camelCase: 'off',
+      camelcase: 'off',
+      'no-undef': 'off',
+
+      // React
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+
+      // Import order
       'import/order': [
         'error',
         {
@@ -34,22 +46,22 @@ const eslintConfig = [
           ],
           'newlines-between': 'always',
           pathGroups: [
-            {
-              pattern: '@app/',
-              group: 'external',
-              position: 'after',
-            },
+            { pattern: '@app/**', group: 'external', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
+          alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
-      'no-undef': 'off', // Needed if using TypeScript
+
+      // TypeScript
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
-];
 
-export default eslintConfig;
+  // Default ignores
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+]);

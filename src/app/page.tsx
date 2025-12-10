@@ -99,7 +99,7 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
-        <Button>Button</Button>
+        {/* <Button>Button</Button> */}
       </footer>
     </div>
   );
